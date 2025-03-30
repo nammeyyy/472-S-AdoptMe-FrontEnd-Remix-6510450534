@@ -1,0 +1,40 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: adoptme-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - DOMAIN=${DOMAIN}
+      - PHOTO=${PHOTO}
+      - PHOTOS3=${PHOTOS3}
+      - PHOTOS3POST=${PHOTOS3POST}
+      - PHOTO_KEY=${PHOTO_KEY}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - CHOKIDAR_USEPOLLING=true
+    networks:
+      - adoptme-network
+    volumes:
+      - .:/myapp
+      - /myapp/node_modules
+    command: sh -c "bun install && bun run dev --host"
+  
+  stripe-cli:
+    image: stripe/stripe-cli
+    container_name: stripe-webhook
+    entrypoint: ["stripe", "listen", "--forward-to", "frontend:5173/webhook"]
+    environment:
+      - STRIPE_API_KEY=${STRIPE_SECRET_KEY}
+    networks:
+      - adoptme-network
+    depends_on:
+      - frontend
+
+networks:
+  adoptme-network:
+    external: true
