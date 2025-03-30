@@ -22,6 +22,7 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
     return <div className="h-64 bg-gray-100 flex items-center justify-center">Loading map...</div>;
   }
   
+  //client-side rendering
   return <>{children}</>;
 }
 
